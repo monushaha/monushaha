@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monu Shaha — Backend & Android Developer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0b0e14;
+    --surface: #12161f;
+    --surface-2: #1a212c;
+    --text: #e9e6dd;
+    --text-dim: #8891a0;
+    --text-dimmer: #5c6472;
+    --copper: #cb7d3f;
+    --copper-soft: rgba(203,125,63,0.14);
+    --teal: #4fb6ac;
+    --teal-soft: rgba(79,182,172,0.14);
+    --line: rgba(233,230,221,0.09);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+  *{ box-sizing: border-box; margin:0; padding:0; }
+  html{ scroll-behavior: smooth; }
+  body{
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+  ::selection{ background: var(--copper-soft); color: var(--text); }
+
+  /* faint circuit dot-grid backdrop */
+  .grid-bg{
+    position: fixed; inset:0; z-index:-1;
+    background-image: radial-gradient(circle, rgba(233,230,221,0.06) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black 40%, transparent 90%);
+  }
+
+  a{ color: inherit; text-decoration: none; }
+
+  .wrap{ max-width: 1080px; margin: 0 auto; padding: 0 32px; }
+
+  /* NAV */
+  header{
+    position: fixed; top:0; left:0; right:0; z-index: 50;
+    backdrop-filter: blur(10px);
+    background: rgba(11,14,20,0.72);
+    border-bottom: 1px solid var(--line);
+  }
+  nav.wrap{
+    display:flex; align-items:center; justify-content:space-between;
+    height: 64px;
+  }
+  .logo{
+    font-family: var(--font-mono);
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    color: var(--text);
+  }
+  .logo span{ color: var(--copper); }
+  .navlinks{ display:flex; gap: 28px; }
+  .navlinks a{
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
+    letter-spacing: 0.03em;
+    transition: color .2s ease;
+    text-transform: lowercase;
+  }
+  .navlinks a:hover{ color: var(--copper); }
+  .navlinks a::before{ content: "./"; color: var(--text-dimmer); }
+
+  /* HERO */
+  .hero{
+    position: relative;
+    padding: 168px 0 40px;
+    min-height: 100vh;
+    display:flex; flex-direction:column; justify-content:center;
+  }
+  .eyebrow{
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--teal);
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+    display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:""; width:7px; height:7px; border-radius:50%;
+    background: var(--teal); display:inline-block;
+    box-shadow: 0 0 8px var(--teal);
+  }
+  h1.name{
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: clamp(2.6rem, 7vw, 5.2rem);
+    line-height: 0.98;
+    letter-spacing: -0.02em;
+    margin-bottom: 20px;
+  }
+  h1.name .l2{ color: var(--text-dimmer); }
+  .role{
+    font-family: var(--font-mono);
+    font-size: clamp(0.95rem, 2vw, 1.15rem);
+    color: var(--copper);
+    margin-bottom: 26px;
+  }
+  .summary{
+    max-width: 620px;
+    color: var(--text-dim);
+    font-size: 1.02rem;
+    margin-bottom: 36px;
+  }
+  .cta-row{ display:flex; flex-wrap:wrap; gap: 14px; margin-bottom: 64px; }
+  .btn{
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 12px 20px;
+    border-radius: 3px;
+    border: 1px solid var(--line);
+    transition: all .2s ease;
+    letter-spacing: 0.02em;
+  }
+  .btn.primary{
+    background: var(--copper);
+    color: #14100b;
+    border-color: var(--copper);
+    font-weight: 600;
+  }
+  .btn.primary:hover{ background: #dd8e50; }
+  .btn.ghost:hover{ border-color: var(--teal); color: var(--teal); }
+
+  /* 3D STACK CANVAS */
+  .stack-stage{
+    position: relative;
+    width: 100%;
+    height: 380px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: linear-gradient(180deg, var(--surface) 0%, var(--bg) 100%);
+    overflow: hidden;
+    cursor: grab;
+  }
+  .stack-stage:active{ cursor: grabbing; }
+  .stack-stage canvas{ display:block; width:100%; height:100%; }
+  .stage-label{
+    position:absolute; top:14px; left:16px;
+    font-family: var(--font-mono); font-size: 11px; color: var(--text-dimmer);
+    letter-spacing: 0.05em; z-index: 2; pointer-events:none;
+  }
+  .stage-hint{
+    position:absolute; bottom:14px; right:16px;
+    font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dimmer);
+    z-index: 2; pointer-events:none;
+  }
+
+  /* SECTION SHELL */
+  section{ padding: 96px 0; border-top: 1px solid var(--line); }
+  .sec-head{ display:flex; align-items:baseline; gap: 14px; margin-bottom: 48px; }
+  .sec-tag{
+    font-family: var(--font-mono); font-size: 12px; color: var(--copper);
+    letter-spacing: 0.08em;
+  }
+  h2.sec-title{
+    font-family: var(--font-display); font-weight: 600;
+    font-size: clamp(1.6rem, 3.4vw, 2.2rem);
+  }
+
+  /* ABOUT */
+  .about-grid{ display:grid; grid-template-columns: 1.3fr 1fr; gap: 48px; }
+  .about-grid p{ color: var(--text-dim); margin-bottom: 16px; }
+  .fact-list{ font-family: var(--font-mono); font-size: 13px; }
+  .fact-list li{ list-style:none; display:flex; justify-content:space-between; padding: 12px 0; border-bottom: 1px solid var(--line); color: var(--text-dim); }
+  .fact-list li span{ color: var(--text); }
+
+  /* EXPERIENCE — build log */
+  .buildlog{ position: relative; padding-left: 28px; }
+  .buildlog::before{
+    content:""; position:absolute; left: 5px; top: 6px; bottom: 6px; width: 1px;
+    background: var(--line);
+  }
+  .entry{ position: relative; padding-bottom: 44px; }
+  .entry:last-child{ padding-bottom: 0; }
+  .entry::before{
+    content:""; position:absolute; left: -28px; top: 4px; width: 11px; height: 11px;
+    border-radius: 50%; background: var(--bg); border: 2px solid var(--copper);
+  }
+  .entry .commit-meta{
+    font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dimmer);
+    margin-bottom: 8px;
+  }
+  .entry .commit-meta .hash{ color: var(--teal); }
+  .entry h3{ font-family: var(--font-display); font-size: 1.2rem; margin-bottom: 4px; }
+  .entry .org{ color: var(--copper); font-size: 0.92rem; margin-bottom: 10px; font-family: var(--font-mono); }
+  .entry ul{ padding-left: 18px; color: var(--text-dim); font-size: 0.95rem; }
+  .entry li{ margin-bottom: 6px; }
+
+  /* PROJECTS */
+  .proj-grid{ display:grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+  .card{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 26px 22px;
+    transition: transform .25s ease, border-color .25s ease;
+    transform-style: preserve-3d;
+  }
+  .card:hover{ transform: translateY(-4px) rotateX(2deg); border-color: rgba(203,125,63,0.35); }
+  .card .pf{ font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dimmer); margin-bottom: 14px; }
+  .card h3{ font-family: var(--font-display); font-size: 1.08rem; margin-bottom: 10px; }
+  .card p.desc{ color: var(--text-dim); font-size: 0.9rem; margin-bottom: 16px; }
+  .tags{ display:flex; flex-wrap:wrap; gap:6px; margin-bottom: 16px; }
+  .tag{
+    font-family: var(--font-mono); font-size: 10.5px; padding: 4px 8px;
+    background: var(--teal-soft); color: var(--teal); border-radius: 3px;
+  }
+  .card .repo{ font-family: var(--font-mono); font-size: 11.5px; color: var(--copper); }
+  .card .repo:hover{ text-decoration: underline; }
+
+  /* SKILLS — layered architecture */
+  .arch{ display:flex; flex-direction:column; gap: 10px; max-width: 640px; margin: 0 auto; }
+  .arch-layer{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    padding: 18px 22px;
+    display:flex; justify-content:space-between; align-items:center;
+    position: relative;
+  }
+  .arch-layer.inprogress{ border-style: dashed; border-color: rgba(79,182,172,0.4); }
+  .arch-layer .lname{ font-family: var(--font-display); font-weight: 600; font-size: 0.98rem; }
+  .arch-layer .litems{ font-family: var(--font-mono); font-size: 11.5px; color: var(--text-dim); text-align:right; }
+  .arch-layer .badge{
+    position:absolute; left:-1px; top:-9px;
+    font-family: var(--font-mono); font-size: 9.5px; color: var(--teal);
+    background: var(--bg); padding: 1px 8px; border: 1px solid rgba(79,182,172,0.4); border-radius: 3px;
+  }
+  .dsa-line{ text-align:center; margin-top: 28px; font-family: var(--font-mono); font-size: 12.5px; color: var(--text-dim); }
+  .dsa-line b{ color: var(--copper); }
+
+  /* ACHIEVEMENTS */
+  .ach-grid{ display:grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .ach{
+    border: 1px solid var(--line); border-radius: 6px; padding: 20px 22px;
+    background: var(--surface);
+    display:flex; gap:14px; align-items:flex-start;
+  }
+  .ach .mark{ font-family: var(--font-mono); color: var(--copper); font-size: 13px; padding-top: 2px; }
+  .ach h4{ font-family: var(--font-display); font-size: 0.98rem; margin-bottom: 4px; }
+  .ach p{ color: var(--text-dim); font-size: 0.87rem; }
+
+  /* CONTACT / FOOTER */
+  footer{ padding: 80px 0 48px; border-top: 1px solid var(--line); }
+  .contact-title{
+    font-family: var(--font-display); font-weight: 700;
+    font-size: clamp(1.8rem, 5vw, 3rem); margin-bottom: 18px;
+  }
+  .contact-title span{ color: var(--copper); }
+  .contact-links{ display:flex; flex-wrap:wrap; gap: 24px; margin-bottom: 56px; }
+  .contact-links a{
+    font-family: var(--font-mono); font-size: 13.5px; color: var(--text-dim);
+    padding-bottom: 4px; border-bottom: 1px solid transparent;
+  }
+  .contact-links a:hover{ color: var(--copper); border-color: var(--copper); }
+  .foot-meta{ font-family: var(--font-mono); font-size: 11px; color: var(--text-dimmer); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+
+  @media (max-width: 860px){
+    .about-grid{ grid-template-columns: 1fr; }
+    .proj-grid{ grid-template-columns: 1fr; }
+    .ach-grid{ grid-template-columns: 1fr; }
+    .navlinks{ display:none; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    html{ scroll-behavior:auto; }
+    *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<header>
+  <nav class="wrap">
+    <div class="logo">monu<span>.</span>shaha</div>
+    <div class="navlinks">
+      <a href="#about">about</a>
+      <a href="#experience">experience</a>
+      <a href="#projects">projects</a>
+      <a href="#skills">skills</a>
+      <a href="#contact">contact</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero wrap">
+    <div class="eyebrow">available for internships &amp; junior backend roles</div>
+    <h1 class="name">Monu Shaha<br><span class="l2">builds full-stack.</span></h1>
+    <div class="role">// Computer Engineering '27 — Java · Android · Spring Boot (in progress)</div>
+    <p class="summary">Hands-on with Java, Android development, and REST API integration — now going deeper into backend engineering with Spring Boot, Hibernate, and MySQL. 100+ DSA problems solved on LeetCode. Led a 6-member team to ship a full-stack build in 24 hours at Smart India Hackathon 2025.</p>
+    <div class="cta-row">
+      <a class="btn primary" href="#projects">view projects</a>
+      <a class="btn ghost" href="#contact">get in touch</a>
+    </div>
+
+    <div class="stack-stage" id="stackStage">
+      <div class="stage-label">stack.render() — drag to rotate</div>
+      <div class="stage-hint">bottom → foundation · top → in progress</div>
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="wrap about-grid">
+      <div>
+        <div class="sec-head"><span class="sec-tag">01</span><h2 class="sec-title">About</h2></div>
+        <p>I'm a Computer Engineering student at PHCET, Mumbai, graduating in 2027. My background is in Java and Android — building apps that talk to real APIs and real databases — and I'm currently extending that into backend engineering with Spring Boot, Hibernate, and MySQL.</p>
+        <p>Outside coursework, I compete on LeetCode (100+ problems across arrays, strings, trees, and DP) and I've led a hackathon team under a 24-hour deadline. I like systems I can trace end to end: request in, database out, no black boxes.</p>
+      </div>
+      <ul class="fact-list">
+        <li>Location <span>Mumbai, India</span></li>
+        <li>Degree <span>B.E. Computer Engineering</span></li>
+        <li>Institute <span>PHCET</span></li>
+        <li>Graduating <span>2027</span></li>
+        <li>CGPA <span>7.8</span></li>
+        <li>LeetCode <span>100+ solved</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="experience">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-tag">02</span><h2 class="sec-title">Experience — build log</h2></div>
+      <div class="buildlog">
+        <div class="entry">
+          <div class="commit-meta"><span class="hash">#JAJUOT25109</span> · 28 Jan 2026 – 27 Feb 2026</div>
+          <h3>Java Developer Intern</h3>
+          <div class="org">JavaSpark Solutions</div>
+          <ul>
+            <li>Developed and optimized backend modules in Java to streamline internal data management.</li>
+            <li>Collaborated on database design and integrated REST APIs to improve system connectivity.</li>
+          </ul>
+        </div>
+        <div class="entry">
+          <div class="commit-meta"><span class="hash">#SIH2025</span> · 29 Jan 2025 · 24hr build</div>
+          <h3>Technical Lead</h3>
+          <div class="org">Smart India Hackathon 2025</div>
+          <ul>
+            <li>Led a cross-functional team of 6 to design and deploy a full-stack web solution within a 24-hour deadline.</li>
+            <li>Owned end-to-end technology planning: backend in Java, frontend in HTML, CSS, and JavaScript.</li>
+            <li>Planned system architecture and UI/UX structure, and coordinated team roles and milestones.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="projects">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-tag">03</span><h2 class="sec-title">Projects</h2></div>
+      <div class="proj-grid">
+        <div class="card">
+          <div class="pf">android · offline-first</div>
+          <h3>Automatic Expense Tracker</h3>
+          <p class="desc">Auto-detects and logs expenses by parsing incoming bank SMS messages, with Firebase Auth and Realtime DB for secure, cross-device data — and an offline-first architecture that keeps logging even without a connection.</p>
+          <div class="tags"><span class="tag">Java</span><span class="tag">Android</span><span class="tag">Firebase Auth</span><span class="tag">Realtime DB</span></div>
+          <a class="repo" href="https://github.com/monushaha/AutoExpo_Download" target="_blank" rel="noopener">github.com/monushaha/AutoExpo_Download →</a>
+        </div>
+        <div class="card">
+          <div class="pf">android · rest api</div>
+          <h3>Movie Rating App</h3>
+          <p class="desc">A dynamic movie discovery platform pulling real-time cinematic data through REST APIs, with a Firebase backend syncing user reviews and cloud storage across devices.</p>
+          <div class="tags"><span class="tag">Java</span><span class="tag">REST APIs</span><span class="tag">Firebase</span><span class="tag">Material Design</span></div>
+          <a class="repo" href="https://github.com/monushaha" target="_blank" rel="noopener">github.com/monushaha →</a>
+        </div>
+        <div class="card">
+          <div class="pf">web · full-stack</div>
+          <h3>Pratiksha Cafe</h3>
+          <p class="desc">A full cafe management web app with real-time order tracking and secure admin login, built around a simple, responsive UI for day-to-day cafe operations.</p>
+          <div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">JavaScript</span></div>
+          <a class="repo" href="https://github.com/monushaha/Pratiksha_Cafe" target="_blank" rel="noopener">github.com/monushaha/Pratiksha_Cafe →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-tag">04</span><h2 class="sec-title">Skills — the stack, layer by layer</h2></div>
+      <div class="arch">
+        <div class="arch-layer inprogress">
+          <span class="badge">building now</span>
+          <span class="lname">Backend</span>
+          <span class="litems">Spring Boot · Hibernate · REST API design · MySQL</span>
+        </div>
+        <div class="arch-layer">
+          <span class="lname">Mobile &amp; Web</span>
+          <span class="litems">Android (Java) · Firebase Auth &amp; Realtime DB</span>
+        </div>
+        <div class="arch-layer">
+          <span class="lname">Languages</span>
+          <span class="litems">Core Java · JavaScript · HTML · CSS · SQL</span>
+        </div>
+        <div class="arch-layer">
+          <span class="lname">Tools &amp; Platforms</span>
+          <span class="litems">Git &amp; GitHub · Postman · Android Studio · VS Code · Oracle Cloud</span>
+        </div>
+        <div class="arch-layer">
+          <span class="lname">Foundations</span>
+          <span class="litems">OOPs · DBMS · Data Structures &amp; Algorithms</span>
+        </div>
+      </div>
+      <div class="dsa-line"><b>100+</b> DSA problems solved on LeetCode — arrays, strings, trees, dynamic programming.</div>
+    </div>
+  </section>
+
+  <section id="achievements">
+    <div class="wrap">
+      <div class="sec-head"><span class="sec-tag">05</span><h2 class="sec-title">Certifications &amp; achievements</h2></div>
+      <div class="ach-grid">
+        <div class="ach"><span class="mark">✓</span><div><h4>OCI 2025 Certified AI Foundations Associate</h4><p>Oracle Cloud Infrastructure — cloud architecture and AI integration fundamentals.</p></div></div>
+        <div class="ach"><span class="mark">✓</span><div><h4>Certified Java Developer</h4><p>JavaSpark Solutions — Certificate No. JAJUOT25109.</p></div></div>
+        <div class="ach"><span class="mark">✓</span><div><h4>100+ LeetCode problems</h4><p>Arrays, strings, trees, and dynamic programming.</p></div></div>
+        <div class="ach"><span class="mark">✓</span><div><h4>Smart India Hackathon 2025</h4><p>Led a 6-member team to a full-stack build in 24 hours.</p></div></div>
+      </div>
+    </div>
+  </section>
+
+  <footer id="contact">
+    <div class="wrap">
+      <div class="contact-title">Let's build<span>.</span> something.</div>
+      <div class="contact-links">
+        <a href="mailto:monushaha2005@gmail.com">monushaha2005@gmail.com</a>
+        <a href="tel:+918425057273">+91 8425057273</a>
+        <a href="https://github.com/monushaha" target="_blank" rel="noopener">github.com/monushaha</a>
+        <a href="https://linkedin.com/in/monu-shaha" target="_blank" rel="noopener">linkedin.com/in/monu-shaha</a>
+        <a href="https://leetcode.com/monushaha" target="_blank" rel="noopener">leetcode.com/monushaha</a>
+      </div>
+      <div class="foot-meta">
+        <span>© 2026 Monu Vinod Shaha</span>
+        <span>built with three.js</span>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function(){
+  var stage = document.getElementById('stackStage');
+  if(!stage || typeof THREE === 'undefined') return;
+
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(38, stage.clientWidth/stage.clientHeight, 0.1, 100);
+  camera.position.set(0, 1.6, 8.5);
+
+  var renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.setSize(stage.clientWidth, stage.clientHeight);
+  stage.appendChild(renderer.domElement);
+
+  // lights
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  var key = new THREE.DirectionalLight(0xffffff, 0.9);
+  key.position.set(4, 6, 6);
+  scene.add(key);
+  var rim = new THREE.PointLight(0x4fb6ac, 0.8, 20);
+  rim.position.set(-5, -2, 3);
+  scene.add(rim);
+
+  // group holding the whole stack — user rotates this
+  var group = new THREE.Group();
+  scene.add(group);
+
+  var layerDefs = [
+    { label: 'JAVA / ANDROID', color: 0xcb7d3f, progress: false },
+    { label: 'FIREBASE',       color: 0xd99a63, progress: false },
+    { label: 'MYSQL',          color: 0x8891a0, progress: true  },
+    { label: 'HIBERNATE',      color: 0x6fb8b0, progress: true  },
+    { label: 'SPRING BOOT',    color: 0x4fb6ac, progress: true  }
+  ];
+
+  function makeLabelTexture(text){
+    var c = document.createElement('canvas');
+    c.width = 512; c.height = 96;
+    var ctx = c.getContext('2d');
+    ctx.fillStyle = 'rgba(0,0,0,0)';
+    ctx.fillRect(0,0,c.width,c.height);
+    ctx.font = '600 40px JetBrains Mono, monospace';
+    ctx.fillStyle = '#0b0e14';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, c.width/2, c.height/2);
+    var tex = new THREE.CanvasTexture(c);
+    tex.needsUpdate = true;
+    return tex;
+  }
+
+  var layerH = 0.62, gap = 0.16, w = 4.4, d = 2.6;
+  var totalH = layerDefs.length * (layerH + gap);
+  var startY = -totalH/2 + layerH/2;
+
+  layerDefs.forEach(function(def, i){
+    var geo = new THREE.BoxGeometry(w - i*0.18, layerH, d - i*0.1);
+    var mat = new THREE.MeshStandardMaterial({
+      color: def.color,
+      roughness: 0.45,
+      metalness: 0.15,
+      transparent: def.progress,
+      opacity: def.progress ? 0.55 : 1,
+      wireframe: false
+    });
+    var mesh = new THREE.Mesh(geo, mat);
+    mesh.position.y = startY + i*(layerH+gap);
+    group.add(mesh);
+
+    if(def.progress){
+      var edges = new THREE.EdgesGeometry(geo);
+      var line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x4fb6ac }));
+      line.position.copy(mesh.position);
+      group.add(line);
+    }
+
+    var labelTex = makeLabelTexture(def.label);
+    var labelMat = new THREE.SpriteMaterial({ map: labelTex, transparent: true });
+    var sprite = new THREE.Sprite(labelMat);
+    sprite.scale.set(2.1, 0.4, 1);
+    sprite.position.set(0, mesh.position.y, (d - i*0.1)/2 + 0.02);
+    group.add(sprite);
+  });
+
+  group.rotation.x = -0.18;
+  group.rotation.y = 0.5;
+
+  // drag to rotate
+  var dragging = false, lastX = 0, lastY = 0;
+  var velY = 0.0025, velX = 0;
+
+  function pointerDown(x, y){ dragging = true; lastX = x; lastY = y; }
+  function pointerMove(x, y){
+    if(!dragging) return;
+    var dx = x - lastX, dy = y - lastY;
+    group.rotation.y += dx * 0.006;
+    group.rotation.x += dy * 0.004;
+    group.rotation.x = Math.max(-0.9, Math.min(0.9, group.rotation.x));
+    velY = dx * 0.0003;
+    lastX = x; lastY = y;
+  }
+  function pointerUp(){ dragging = false; }
+
+  stage.addEventListener('mousedown', function(e){ pointerDown(e.clientX, e.clientY); });
+  window.addEventListener('mousemove', function(e){ pointerMove(e.clientX, e.clientY); });
+  window.addEventListener('mouseup', pointerUp);
+  stage.addEventListener('touchstart', function(e){ var t=e.touches[0]; pointerDown(t.clientX, t.clientY); }, {passive:true});
+  stage.addEventListener('touchmove', function(e){ var t=e.touches[0]; pointerMove(t.clientX, t.clientY); }, {passive:true});
+  stage.addEventListener('touchend', pointerUp);
+
+  function onResize(){
+    var w2 = stage.clientWidth, h2 = stage.clientHeight;
+    camera.aspect = w2/h2;
+    camera.updateProjectionMatrix();
+    renderer.setSize(w2, h2);
+  }
+  window.addEventListener('resize', onResize);
+
+  function animate(){
+    requestAnimationFrame(animate);
+    if(!dragging){
+      group.rotation.y += reduceMotion ? 0 : velY;
+      velY *= 0.985;
+    }
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+</body>
+</html>
